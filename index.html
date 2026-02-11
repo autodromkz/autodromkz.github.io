@@ -192,6 +192,25 @@
       text-align:center;
       padding:0 80px;
     }
+    .hero-logo{
+      width:clamp(56px, 10vw, 96px);
+      height:clamp(56px, 10vw, 96px);
+      border-radius:50%;
+      overflow:hidden;
+      background:#fff;
+      padding:0;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      margin:0 auto 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .hero-logo img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
     h1{
       margin:0 0 14px;
       font-size:34px;
@@ -416,11 +435,11 @@
       margin:20px 0 8px;
       font-size:34px;
       font-weight:700;
-      color:#dfe9e4;
+      color:#eff5f2;
     }
     .board p{
       margin:0;
-      color:#c7d1cd;
+      color:#eaeeed;
       font-size:13px;
     }
     .note{
@@ -846,6 +865,9 @@
         <a class="cta js-open-suggest" href="#" style="margin-left: 30px;">Есть предложение</a>
       </div>
       <div class="hero-content">
+        <div class="hero-logo" aria-hidden="true">
+          <img src="assets/images/logo.png" alt="">
+        </div>
         <h1>Изучаете знаки пдд<br> и готовитесь к сдаче экзамена<br> на права?</h1>
         <p class="sub">Мы поможем вам повторить все дорожные знаки и подготовиться<br> к экзамену на автодроме.</p>
         <a class="btn js-open-modal" href="#">Начать изучение</a>
