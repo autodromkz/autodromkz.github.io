@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Переадресация...</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --bg: #1f5a46;
+            --card: #f5f7f8;
+            --ink: #111314;
+            --muted: #6c7278;
+            --grid: rgba(255,255,255,0.07);
+            --shadow: 0 20px 40px rgba(0,0,0,0.25);
+        }
+        *{box-sizing:border-box;}
+        body{
+            margin:0;
+            font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+        }
+        .canvas{
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:24px 12px;
+            background:
+                linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.35)),
+                repeating-linear-gradient(0deg, var(--grid) 0, var(--grid) 1px, transparent 1px, transparent 24px),
+                repeating-linear-gradient(90deg, var(--grid) 0, var(--grid) 1px, transparent 1px, transparent 24px),
+                var(--bg);
+        }
+        .card{
+            width:min(720px, 94vw);
+            background: var(--card);
+            border:1px solid #e2e6ea;
+            border-radius:18px;
+            padding:28px 30px;
+            box-shadow: var(--shadow);
+            text-align:center;
+        }
+        .card h2{
+            margin:0 0 10px;
+            font-size:24px;
+            font-weight:700;
+            color:#2b2f33;
+        }
+        .card p{
+            margin:0 0 10px;
+            color:#3c434b;
+            font-size:13px;
+            line-height:1.6;
+        }
+        .btns{
+            display:flex;
+            gap:12px;
+            justify-content:center;
+            flex-wrap:wrap;
+            margin-top:12px;
+        }
+        .btn{
+            display:inline-block;
+            background:#2d2f31;
+            color:white;
+            padding:10px 16px;
+            border-radius:16px;
+            font-size:12px;
+            font-weight:600;
+            text-decoration:none;
+        }
+        #redirect-msg{
+            color:#dfe9e4;
+            font-size:13px;
+            text-align:center;
+            margin:0;
+        }
+    </style>
+    <script>
+        window.onload = function () {
+            const queryParams = new URLSearchParams(window.location.search);
+            const app = queryParams.get("app"); // значение параметра ?app=
+
+            // Ссылки для разных приложений
+            const apps = {
+                pdd: {
+                    ios: "https://apps.apple.com/kz/app/%D0%BF%D0%B4%D0%B4-%D0%B4%D0%BE%D1%80%D0%BE%D0%B6%D0%BD%D1%8B%D0%B5-%D0%B7%D0%BD%D0%B0%D0%BA%D0%B8/id6747382280",
+                    android: "https://play.google.com/store/apps/details?id=com.MFMDEnterprise.apppddtest"
+                },
+                autodrom: {
+                    ios: "https://apps.apple.com/kz/app/autodromkz/id6736940882", 
+                    android: "https://play.google.com/store/apps/details?id=com.MFMDEnterprise.autodromkz&hl=en"
+                    }
+                };
+
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+        if (app && apps[app]) {
+            const targetUrl = isIOS ? apps[app].ios : apps[app].android;
+            window.location.href = targetUrl;
+        } else {
+            document.getElementById("content").style.display = "block";
+        }
+            };
+    </script>
+</head>
+<body>
+    <div class="canvas">
+        <div class="card" id="content" style="display:none;">
+            <h2>Добро пожаловать!</h2>
+            <p>Для перехода в нужное приложение используйте кнопки ниже.</p>
+            <div class="btns">
+                <a class="btn" href="?app=pdd">Перейти в ПДД</a>
+                <a class="btn" href="?app=autodrom">Перейти в Автодром</a>
+            </div>
+        </div>
+        <p id="redirect-msg">Переадресация, подождите...</p>
+    </div>
+</body>
+</html>

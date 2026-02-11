@@ -1,45 +1,1490 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Переадресация...</title>
-    <script>
-        window.onload = function () {
-            const queryParams = new URLSearchParams(window.location.search);
-            const app = queryParams.get("app"); // значение параметра ?app=
-
-            // Ссылки для разных приложений
-            const apps = {
-                pdd: {
-                    ios: "https://apps.apple.com/kz/app/%D0%BF%D0%B4%D0%B4-%D0%B4%D0%BE%D1%80%D0%BE%D0%B6%D0%BD%D1%8B%D0%B5-%D0%B7%D0%BD%D0%B0%D0%BA%D0%B8/id6747382280",
-                    android: "https://play.google.com/store/apps/details?id=com.MFMDEnterprise.apppddtest"
-                },
-                autodrom: {
-                    ios: "https://apps.apple.com/kz/app/autodromkz/id6736940882", 
-                    android: "https://play.google.com/store/apps/details?id=com.MFMDEnterprise.autodromkz&hl=en"
-                    }
-                };
-
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-        if (app && apps[app]) {
-            const targetUrl = isIOS ? apps[app].ios : apps[app].android;
-            window.location.href = targetUrl;
-        } else {
-            document.getElementById("content").style.display = "block";
-        }
-            };
-    </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Actual — Hero Replica</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #1f5a46;
+      --card: #f5f7f8;
+      --ink: #111314;
+      --muted: #6c7278;
+      --pill: #2b2f33;
+      --grid: rgba(255,255,255,0.07);
+      --shadow: 0 20px 40px rgba(0,0,0,0.25);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    .canvas{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      padding:0 8px 0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.35)),
+        repeating-linear-gradient(0deg, var(--grid) 0, var(--grid) 1px, transparent 1px, transparent 24px),
+        repeating-linear-gradient(90deg, var(--grid) 0, var(--grid) 1px, transparent 1px, transparent 24px),
+        var(--bg);
+    }
+    .hero{
+      width:min(1050px, calc(100% - 16px));
+      background: var(--card);
+      border-radius:0 0 28px 28px;
+      box-shadow: var(--shadow);
+      position:relative;
+      padding:22px 32px 60px;
+      overflow:hidden;
+    }
+    .hero::after{
+      content:"";
+      position:absolute;
+      right:-60px;
+      bottom:-80px;
+      width:280px;
+      height:260px;
+      background: url("assets/images/logoPddApp.png") center/cover no-repeat;
+      border-radius: 50px 0 0 0;
+      box-shadow:-10px -10px 20px rgba(0,0,0,0.08);
+      transform: rotate(-12deg);
+      pointer-events:none;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;
+      right:-30px;
+      bottom:-40px;
+      width:220px;
+      height:200px;
+      border-radius: 0 0 200px 0;
+      background: rgba(0,0,0,0.12);
+      filter: blur(8px);
+      transform: rotate(-12deg);
+      z-index:-1;
+      pointer-events:none;
+    }
+   /* .hero .hero-decor-left{
+      position:absolute;
+      left:-60px;
+      bottom:-80px;
+      width:280px;
+      height:260px;
+      background: url("assets/images/logoSimulator.png") center/cover no-repeat;
+      border-radius: 0 50px 0 0;
+      box-shadow: 10px -10px 20px rgba(0,0,0,0.08);
+      transform: rotate(12deg);
+      z-index:0;
+    } */
+    .nav{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      font-size:13px;
+      color:#5b6268;
+      margin:0 auto 50px;
+      width:fit-content;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#fff;
+      border:1px solid #d8dde1;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    .nav-toggle{
+      display:none;
+      position:absolute;
+      top:18px;
+      left:18px;
+      width:36px;
+      height:36px;
+      border-radius:10px;
+      border:0;
+      background:transparent;
+      box-shadow:none;
+      opacity:0.7;
+      cursor:pointer;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      flex-direction:column;
+      z-index:30;
+    }
+    .nav-toggle span{
+      width:18px;
+      height:2px;
+      background:#2b2f33;
+      display:block;
+      border-radius:2px;
+    }
+    .nav-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(16,20,24,0.4);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 150ms ease;
+      z-index:19;
+    }
+    .nav-overlay.is-open{
+      opacity:1;
+      pointer-events:auto;
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:2px 4px;
+      border-radius:16px;
+      font-weight:600;
+      color:#343a40;
+    }
+    .logo .mark{
+      width:16px;
+      height:16px;
+      border:2px solid #31363a;
+      border-radius:6px;
+      position:relative;
+    }
+    .logo .mark:after{
+      content:"";
+      position:absolute;
+      left:3px;top:3px;
+      width:6px;height:6px;
+      border:2px solid #31363a;
+      border-radius:3px;
+    }
+    .nav a{
+      text-decoration:none;
+      color:#5b6268;
+      font-weight:500;
+      padding:2px 4px;
+      border-radius:10px;
+      transition: color 120ms ease, background 120ms ease;
+      cursor:pointer;
+    }
+    .nav a:hover{
+      color:#1b1f23;
+      background:rgba(0,0,0,0.06);
+    }
+    .nav .cta{
+      margin-left:10px;
+      background:#2d2f31;
+      color:white;
+      padding:6px 14px;
+      border-radius:16px;
+      font-weight:600;
+      font-size:12px;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.2) inset;
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+    .nav .cta:hover{
+      background:#1f2225;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.15);
+    }
+    .hero-content{
+      text-align:center;
+      padding:0 80px;
+    }
+    h1{
+      margin:0 0 14px;
+      font-size:34px;
+      line-height:1.15;
+      font-weight:800;
+      color:#111314;
+    }
+    .sub{
+      margin:0 auto 24px;
+      max-width:520px;
+      color:#7a8187;
+      font-size:13px;
+      line-height:1.5;
+    }
+    .btn{
+      display:inline-block;
+      background:#2d2f31;
+      color:white;
+      padding:10px 18px;
+      border-radius:18px;
+      font-size:12px;
+      font-weight:600;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+      text-decoration:none;
+    }
+    .modal-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(16,20,24,0.62);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 150ms ease;
+      z-index:20;
+      backdrop-filter: blur(6px);
+    }
+    .modal-overlay.is-open{
+      opacity:1;
+      pointer-events:auto;
+    }
+    body.modal-open{
+      overflow:hidden;
+    }
+    .modal{
+      width:min(720px, 92vw);
+      background:#f7f9fb;
+      border-radius:24px;
+      padding:24px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+      position:relative;
+    }
+    .legal-text{
+      max-height:60vh;
+      overflow:auto;
+      padding-right:6px;
+      font-size:13px;
+      line-height:1.65;
+      color:#1d2329;
+    }
+    .legal-text p{
+      margin:0 0 10px;
+    }
+    .legal-text ol{
+      margin:0 0 10px;
+      padding-left:18px;
+    }
+    .legal-text li{
+      margin:0 0 8px;
+    }
+    .suggest-form{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .form-label{
+      font-size:12px;
+      color:#4b535b;
+    }
+    .form-field{
+      width:100%;
+      border:1px solid #d7dde2;
+      border-radius:12px;
+      padding:8px 10px;
+      font-size:13px;
+      font-family: inherit;
+      background:#fff;
+      color:#1b1f23;
+    }
+    .form-field:focus{
+      outline:2px solid rgba(37,125,206,0.2);
+      border-color:#7bb0e6;
+    }
+    .form-submit{
+      align-self:flex-start;
+      margin-top:4px;
+    }
+    .modal h3{
+      margin:0 0 6px;
+      font-size:20px;
+      color:#101214;
+    }
+    .modal .modal-sub{
+      margin:0 0 18px;
+      color:#66707a;
+      font-size:13px;
+    }
+    .modal-close{
+      position:absolute;
+      top:10px;
+      right:10px;
+      width:32px;
+      height:32px;
+      border-radius:50%;
+      border:1px solid #d7dde2;
+      background:#fff;
+      cursor:pointer;
+      font-size:18px;
+      line-height:1;
+      color:#2b2f33;
+    }
+    .app-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:16px;
+    }
+    .app-card{
+      display:block;
+      text-decoration:none;
+      color:#1b1f23;
+      background:#fff;
+      border:1px solid #e2e6ea;
+      border-radius:18px;
+      padding:16px;
+      text-align:center;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+      transition: transform 140ms ease, box-shadow 140ms ease;
+      cursor:pointer;
+    }
+    .app-card:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 16px 26px rgba(0,0,0,0.18);
+    }
+    .app-card img{
+      border-radius: 25px;
+      width:120px;
+      height:120px;
+      object-fit:contain;
+      display:block;
+      margin:0 auto 8px;
+      filter:
+        drop-shadow(0 10px 16px rgba(0,0,0,0.22))
+        drop-shadow(0 -3px 6px rgba(255,255,255,0.5));
+    }
+    .app-name{
+      font-weight:600;
+      margin-bottom:8px;
+    }
+    .store-links{
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .store-links a{
+      text-decoration:none;
+      color:#2b2f33;
+      background:#eef1f4;
+      border:1px solid #d8dde1;
+      border-radius:999px;
+      font-size:11px;
+      padding:4px 10px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .store-links svg{
+      width:12px;
+      height:12px;
+      display:block;
+    }
+    .details-btn{
+      margin:8px auto 0;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      border-radius:999px;
+      border:1px solid #d8dde1;
+      background:#fff;
+      font-size:11px;
+      padding:4px 10px;
+      color:#2b2f33;
+      cursor:pointer;
+    }
+    .app-details{
+      margin-top:8px;
+      background:#f3f6f8;
+      border:1px solid #e1e6ea;
+      border-radius:12px;
+      padding:8px 10px;
+      font-size:12px;
+      color:#5b6268;
+      display:none;
+    }
+    .app-details.is-open{
+      display:block;
+    }
+    body.is-mobile .store-links{
+      display:none;
+    }
+    .board{
+      width:min(1050px, 96vw);
+      margin:24px auto 100px;
+      position:relative;
+      color:#e8f0ec;
+      text-align:center;
+      padding:90px 20px 60px;
+    }
+    .board h2{
+      margin:20px 0 8px;
+      font-size:34px;
+      font-weight:700;
+      color:#dfe9e4;
+    }
+    .board p{
+      margin:0;
+      color:#c7d1cd;
+      font-size:13px;
+    }
+    .note{
+      position:absolute;
+      width:160px;
+      height:160px;
+      font-family: "Comic Sans MS", "Bradley Hand", "Segoe Print", cursive;
+      font-size:16px;
+      color:#3a2b2b;
+      box-shadow: 0 14px 26px rgba(0,0,0,0.4);
+      cursor:pointer;
+    }
+    .note .note-text{
+      display:block;
+      text-align:center;
+      line-height:1.1;
+    }
+    .note .pdd-logo{
+      width:36px;
+      height:auto;
+      margin-top:6px;
+      display:block;
+    }
+    .note.pink{
+      background:#ff9aa2;
+      left:40px;
+      top:170px;
+      transform: rotate(-10deg);
+    }
+    .note.yellow{
+      background:#ffe36a;
+      right:60px;
+      top:160px;
+      transform: rotate(10deg);
+      color:#4a3b00;
+    }
+    .clip{
+      position:absolute;
+      width:28px;height:28px;
+      border:3px solid #b3b3b3;
+      border-radius:16px;
+      top:-10px;left:55px;
+      transform: rotate(-12deg);
+      background:transparent;
+    }
+    .feed{
+      position:absolute;
+      top:12px;left:50%;
+      transform:translateX(-50%);
+      background:#f7f7f7;
+      color:#4b4f54;
+      border-radius:10px;
+      padding:8px 12px;
+      font-size:10px;
+      width:220px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+    }
+    .feed .name{
+      font-weight:600;
+      color:#2b2f33;
+      display:block;
+      margin-bottom:2px;
+    }
+    .product{
+      width:min(1050px, 96vw);
+      margin:40px auto 80px;
+      background:#f5f7f8;
+      border:1px solid #e2e6ea;
+      border-radius:18px;
+      padding:28px 30px;
+      color:#1a1d20;
+      box-shadow: 0 20px 36px rgba(0,0,0,0.16);
+      position:relative;
+      overflow:hidden;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0,0,0,0.04) 0, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 26px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.025) 0, rgba(0,0,0,0.025) 1px, transparent 1px, transparent 26px);
+    }
+    .product-title{
+      width:min(1050px, 96vw);
+      margin:30px auto 12px;
+      font-size:34px;
+      font-weight:700;
+      color:#dfe9e4;
+      text-align:center;
+    }
+    .product::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: radial-gradient(60% 60% at 20% 0%, rgba(0,0,0,0.06), transparent 60%),
+                  radial-gradient(60% 60% at 80% 100%, rgba(0,0,0,0.05), transparent 60%);
+      pointer-events:none;
+      mix-blend-mode:multiply;
+    }
+    .product-grid{
+      display:grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap:26px;
+      align-items:start;
+      position:relative;
+      z-index:1;
+    }
+    .product-grid.is-single{
+      grid-template-columns: 1fr;
+    }
+    .product-hero{
+      position:relative;
+      z-index:1;
+      margin:0 0 22px;
+    }
+    .product-hero img{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+    .product h3{
+      margin:0 0 12px;
+      font-size:22px;
+      letter-spacing:0.4px;
+      color:#2b2f33;
+      text-transform:uppercase;
+    }
+    .product h4{
+      margin:18px 0 8px;
+      font-size:14px;
+      letter-spacing:0.4px;
+      color:#2b2f33;
+      text-transform:uppercase;
+      display:inline-block;
+      background:linear-gradient(90deg, rgba(255,209,124,0.7), rgba(255,209,124,0.2));
+      padding:4px 10px;
+      border-radius:6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .product p{
+      margin:0 0 10px;
+      font-size:13px;
+      line-height:1.65;
+      color:#3c434b;
+    }
+    .product ul{
+      margin:0 0 8px;
+      padding:0;
+      list-style:none;
+      font-size:13px;
+      line-height:1.65;
+      color:#3c434b;
+    }
+    .product li::before{
+      content:"• ";
+      color:#8a5a24;
+    }
+    .shot{
+      border-radius:12px;
+      border:1px solid #d7d0c6;
+      background:#f2efe8;
+      box-shadow: 0 18px 30px rgba(0,0,0,0.22);
+      position:relative;
+      padding:12px;
+      display:inline-block;
+      cursor:pointer;
+    }
+    .shot::before{
+      content:"";
+      position:absolute;
+      top:-8px;
+      left:20px;
+      width:80px;
+      height:18px;
+      background:rgba(216, 186, 128, 0.7);
+      border-radius:4px;
+      transform: rotate(-6deg);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .shot-frame{
+      border-radius:8px;
+      overflow:hidden;
+      border:1px solid #d1c7ba;
+      background:#fff;
+      box-shadow: inset 0 0 0 6px #f5f1ea;
+      position:relative;
+    }
+    .shot img{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+    .product .credit{
+      margin-top:14px;
+      color:#5b5f64;
+      font-family: "Caveat", cursive;
+      font-size:18px;
+    }
+    .shot-slide{
+      display:none;
+    }
+    .shot-slide.is-active{
+      display:block;
+    }
+    .shot-placeholder{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#6b6f75;
+      font-size:12px;
+      text-align:center;
+      padding:16px;
+      background:linear-gradient(135deg, #f4f1ea, #fbfaf7);
+    }
+    .product a{
+      color:#1d6fb8;
+      text-decoration:none;
+      border-bottom:1px dashed rgba(29,111,184,0.4);
+    }
+    .product a:hover{
+      color:#15558f;
+      border-bottom-color:rgba(21,85,143,0.7);
+    }
+    .icon-list{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:8px 16px;
+      margin:6px 0 10px;
+    }
+    .icon-item{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:13px;
+      color:#3c434b;
+    }
+    .icon{
+      width:18px;
+      height:18px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:4px;
+      background:#efe7d7;
+      color:#5c3b1f;
+      flex:0 0 18px;
+    }
+    .icon svg{width:12px;height:12px;display:block;}
+    .footer{
+      width:min(1050px, 96vw);
+      margin:30px auto 70px;
+      text-align:center;
+      color:#dfe9e4;
+    }
+    .footer-links{
+      display:flex;
+      gap:16px;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+    .footer-link{
+      background:transparent;
+      border:0;
+      color:#dfe9e4;
+      font-size:13px;
+      letter-spacing:0.4px;
+      cursor:pointer;
+      text-decoration:underline;
+      text-decoration-style:dotted;
+      text-underline-offset:3px;
+    }
+    .footer-link:hover{
+      color:#ffffff;
+    }
+    .slider-modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.65);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:1000;
+      padding:24px;
+    }
+    .slider-modal.is-open{display:flex;}
+    .slider-box{
+      width:min(980px, 96vw);
+      background:#f5f7f8;
+      border-radius:16px;
+      padding:16px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+      position:relative;
+    }
+    .slider-view{
+      position:relative;
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+      border:1px solid #e2e6ea;
+    }
+    .slider-view img{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+    .slider-close{
+      position:absolute;
+      top:10px;
+      right:10px;
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      border:1px solid #d7dde2;
+      background:#fff;
+      cursor:pointer;
+      font-size:18px;
+      line-height:1;
+      color:#2b2f33;
+    }
+    @media (max-width: 900px){
+      .hero-content{padding:0 20px;}
+      .nav{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+        position:fixed;
+        top:0;
+        left:-260px;
+        height:100vh;
+        width:240px;
+        margin:0;
+        padding:22px 18px;
+        border-radius:0 18px 18px 0;
+        box-shadow: 0 24px 40px rgba(0,0,0,0.3);
+        transition: left 180ms ease;
+        z-index:20;
+      }
+      .nav.is-open{
+        left:0;
+      }
+      .nav a{
+        width:100%;
+      }
+      .nav .cta{
+        margin-left:0;
+      }
+      .nav-toggle{
+        display:flex;
+      }
+      .hero::after{display:none;}
+      .hero .hero-decor-left{display:none;}
+      .product-grid{grid-template-columns:1fr;}
+      .product-grid > .shot{order:-1;}
+      .board{padding-bottom:120px;}
+      .note{
+        width:160px;
+        height:160px;
+        font-size:16px;
+      }
+      .note.pink{
+        top:auto;
+        bottom:-70px;
+        left:20px;
+        transform: rotate(-8deg);
+      }
+      .note.yellow{
+        top:auto;
+        bottom:-70px;
+        right:20px;
+        transform: rotate(8deg);
+      }
+    }
+    @media (max-width: 640px){
+      .app-grid{grid-template-columns: 1fr;}
+    }
+    @media (max-width: 640px){
+      h1{font-size:28px;}
+      .board h2{font-size:28px;}
+      .board{padding-bottom:100px;}
+      .note{
+        width:120px;
+        height:120px;
+        font-size:12px;
+      }
+      .note.pink{
+        top:auto;
+        bottom:-50px;
+        left:20px;
+        transform: rotate(-8deg);
+      }
+      .note.yellow{
+        top:auto;
+        bottom:-50px;
+        right:20px;
+        transform: rotate(8deg);
+      }
+    }
+  </style>
 </head>
 <body>
-    <div id="content" style="display:none;">
-        <h2>Добро пожаловать!</h2>
-        <p>Для перехода в нужное приложение, используйте параметры:</p>
-        <ul>
-            <li><a href="?app=pdd">Перейти в ПДД</a></li>
-            <li><a href="?app=autodrom">Перейти в Автодром</a></li>
-        </ul>
+  <div class="canvas">
+    <section class="hero">
+      <button class="nav-toggle js-nav-toggle" type="button" aria-label="Открыть меню">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav">
+        <div class="logo" style="margin-right: 30px;">
+          <span class="mark"></span>AutodromKZ</div>
+        <a href="road_signs.html">Знаки</a>
+        <a href="#">Send Invoices</a>
+        <a href="app.html">Apps</a>
+        <a href="#">Условия</a>
+        <a class="cta js-open-suggest" href="#" style="margin-left: 30px;">Есть предложение</a>
+      </div>
+      <div class="hero-content">
+        <h1>Изучаете знаки пдд<br> и готовитесь к сдаче экзамена<br> на права?</h1>
+        <p class="sub">Мы поможем вам повторить все дорожные знаки и подготовиться<br> к экзамену на автодроме.</p>
+        <a class="btn js-open-modal" href="#">Начать изучение</a>
+      </div>
+      <span class="hero-decor-left" aria-hidden="true"></span>
+    </section>
+    <div class="nav-overlay" id="nav-overlay" aria-hidden="true"></div>
+    <div class="modal-overlay" id="app-modal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+        <button class="modal-close" type="button" aria-label="Закрыть">×</button>
+        <h3 id="app-modal-title">Выберите приложение</h3>
+        <p class="modal-sub">Доступно в App Store и Play Market.</p>
+        <div class="app-grid">
+          <div class="app-card" role="link" tabindex="0" data-app="simulator" data-ios="https://apps.apple.com/us/app/autodromkz/id6736940882" data-android="https://play.google.com/store/apps/details?id=com.MFMDEnterprise.autodromkz&hl=ru">
+            <img src="assets/images/logoSimulator.png" alt="Логотип приложения автодром симулятор">
+            <div class="app-name">Симулятор автодрома </div>
+            <div class="store-links">
+              <a href="https://apps.apple.com/us/app/autodromkz/id6736940882" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path fill="currentColor" d="M17.6 12.7c.02 2.2 2 2.9 2.02 2.9-.02.05-.31 1.02-1 2.01-.61.87-1.25 1.73-2.25 1.75-.99.02-1.31-.6-2.45-.6s-1.5.58-2.44.62c-.97.04-1.72-.99-2.33-1.86-1.27-1.83-2.24-5.17-.94-7.42.64-1.11 1.78-1.82 3.01-1.84.94-.02 1.83.64 2.41.64.57 0 1.64-.79 2.77-.67.47.02 1.78.19 2.62 1.43-.07.04-1.56.91-1.55 2.64ZM15.4 5.2c.52-.62.87-1.5.78-2.38-.75.03-1.66.5-2.2 1.12-.49.56-.92 1.46-.8 2.33.83.07 1.7-.42 2.22-1.07Z"/>
+                </svg>
+                App Store
+              </a>
+              <a href="https://play.google.com/store/apps/details?id=com.MFMDEnterprise.autodromkz&hl=ru" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path fill="currentColor" d="M3.8 3.2c-.5.3-.8.9-.8 1.5v14.6c0 .6.3 1.1.8 1.5l8.7-8.7-8.7-8.9Zm10 9.1 2.7-2.7-9.1-5.2 6.4 7.9Zm3.1 3.1 4.3-2.5c.7-.4.7-1.3 0-1.7l-4.3-2.5-2.6 2.6 2.6 4.1Zm-9.6 4.2 9.1-5.2-2.7-2.7-6.4 7.9Z"/>
+                </svg>
+                Play Market
+              </a>
+            </div>
+            <button class="details-btn" type="button" aria-expanded="false">Детали</button>
+            <div class="app-details">
+              Реалистичный автодром с заданиями и подсказками для подготовки к экзамену.
+            </div>
+          </div>
+          <div class="app-card" role="link" tabindex="0" data-app="pdd" data-ios="https://apps.apple.com/us/app/%D0%BF%D0%B4%D0%B4-%D0%B4%D0%BE%D1%80%D0%BE%D0%B6%D0%BD%D1%8B%D0%B5-%D0%B7%D0%BD%D0%B0%D0%BA%D0%B8/id6747382280" data-android="https://play.google.com/store/apps/details?id=com.MFMDEnterprise.apppddtest&hl=ru">
+            <img src="assets/images/logoPddApp.png" alt="Логотип приложения ПДД">
+            <div class="app-name">ПДД Дорожные знаки</div>
+            <div class="store-links">
+              <a href="https://apps.apple.com/us/app/%D0%BF%D0%B4%D0%B4-%D0%B4%D0%BE%D1%80%D0%BE%D0%B6%D0%BD%D1%8B%D0%B5-%D0%B7%D0%BD%D0%B0%D0%BA%D0%B8/id6747382280" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path fill="currentColor" d="M17.6 12.7c.02 2.2 2 2.9 2.02 2.9-.02.05-.31 1.02-1 2.01-.61.87-1.25 1.73-2.25 1.75-.99.02-1.31-.6-2.45-.6s-1.5.58-2.44.62c-.97.04-1.72-.99-2.33-1.86-1.27-1.83-2.24-5.17-.94-7.42.64-1.11 1.78-1.82 3.01-1.84.94-.02 1.83.64 2.41.64.57 0 1.64-.79 2.77-.67.47.02 1.78.19 2.62 1.43-.07.04-1.56.91-1.55 2.64ZM15.4 5.2c.52-.62.87-1.5.78-2.38-.75.03-1.66.5-2.2 1.12-.49.56-.92 1.46-.8 2.33.83.07 1.7-.42 2.22-1.07Z"/>
+                </svg>
+                App Store
+              </a>
+              <a href="https://play.google.com/store/apps/details?id=com.MFMDEnterprise.apppddtest&hl=ru" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path fill="currentColor" d="M3.8 3.2c-.5.3-.8.9-.8 1.5v14.6c0 .6.3 1.1.8 1.5l8.7-8.7-8.7-8.9Zm10 9.1 2.7-2.7-9.1-5.2 6.4 7.9Zm3.1 3.1 4.3-2.5c.7-.4.7-1.3 0-1.7l-4.3-2.5-2.6 2.6 2.6 4.1Zm-9.6 4.2 9.1-5.2-2.7-2.7-6.4 7.9Z"/>
+                </svg>
+                Play Market
+              </a>
+            </div>
+            <button class="details-btn" type="button" aria-expanded="false">Детали</button>
+            <div class="app-details">
+              Полная база знаков и правил, тренажер билетов и прогресс обучения.
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <p id="redirect-msg">Переадресация, подождите...</p>
+    <div class="modal-overlay" id="suggest-modal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="suggest-modal-title">
+        <button class="modal-close" type="button" aria-label="Закрыть">×</button>
+        <h3 id="suggest-modal-title">Есть предложение</h3>
+        <p class="modal-sub">Поделитесь идеей или сообщите об ошибке.</p>
+        <form class="suggest-form">
+          <label class="form-label" for="suggest-type">Тема обращения</label>
+          <select id="suggest-type" class="form-field" required>
+            <option value="Нашел ошибку в приложении">Нашел ошибку в приложении</option>
+            <option value="Есть идея улучшить приложение">Есть идея чтобы улучшить приложение</option>
+            <option value="Предлагаю сотрудничество">Предлагаю сотрудничество</option>
+          </select>
+          <label class="form-label" for="suggest-app">О каком приложении речь</label>
+          <select id="suggest-app" class="form-field" required>
+            <option value="AutodromKZ">AutodromKZ</option>
+            <option value="ПДД Дорожные знаки">ПДД Дорожные знаки</option>
+          </select>
+          <label class="form-label" for="suggest-text">Сообщение</label>
+          <textarea id="suggest-text" class="form-field" rows="4" placeholder="Опишите подробнее" required></textarea>
+          <button class="btn form-submit" type="submit">Отправить</button>
+        </form>
+      </div>
+    </div>
+    <div class="board" style="margin-bottom: 120px;margin-top: 50px;">
+      <div class="feed">
+        <span class="name">⚠ ВАЖНОЕ ОБРАЩЕНИЕ</span>
+        Не приобретайте права незаконным способом.
+        Ответственное вождение — залог общей безопасности на дороге.
+      </div>
+      <div class="note pink js-scroll-product" data-app="simulator" role="button" tabindex="0">
+        <div style=" width: 100%;height: 15%; background-color: #e48890;"></div>
+        <span class="note-text" style="padding-top:15px">Изучать <br>автодром в симуляторе<br><span style="color: #257dce;">'AutodromKZ'</span></span>
+      </div>
+      <div class="note yellow js-scroll-product" data-app="pdd" role="button" tabindex="0">
+        <div style=" width: 100%;height: 15%; background-color: #e7cd60;"></div>
+        <div style="padding-top:10px">Повторить <br> все знаки в<br><span style="color: #257dce;">'ПДД Дорожные знаки'</span></div>
+      </div>
+      <h2>Что выбрыть - решаете вы.</h2>
+      <p>Изучайте автодром в симуляторе, <br>который в точности повторяет реальный экзаменационный автодром, <br>или повторяйте все знаки ПДД в нашем учебном приложении.</p>
+    
+    </div>
+    <section class="product" id="product-simulator" tabindex="-1">
+      <div class="product-grid">
+        <div>
+          <h3>AUTODROMKZ — USER GUIDE</h3>
+          <h4>ОБЩАЯ ИНФОРМАЦИЯ</h4>
+          <p>Данный симулятор автодрома полностью повторяет реальный автодром автоцона г. Алматы — Саялы.</p>
+          <p>Трасса построена по реальной экзаменационной схеме: разметка • дорожные знаки • штрафные зоны.</p>
+          <p>Цель — подготовка к практическому экзамену по вождению.</p>
+
+          <h4>РЕЖИМЫ ОБУЧЕНИЯ</h4>
+          <p>Пользователю доступны 2 режима:</p>
+          <p><strong>01 — СВОБОДНОЕ ВОЖДЕНИЕ</strong><br>Free Driving Mode</p>
+          <ul>
+            <li>Движение без ограничений</li>
+            <li>Нет указателей маршрута</li>
+            <li>Нет подсказок и предупреждений</li>
+            <li>Подходит для опытных водителей</li>
+          </ul>
+          <p>Используется для тренировки навыков без помощи системы.</p>
+
+          <p><strong>02 — РЕЖИМ ЭКЗАМЕНА</strong><br>Exam Mode</p>
+          <p>Система автоматически начисляет штрафные баллы по правилам реального автоЦОНа.</p>
+          <p>Для успешного прохождения: сумма штрафных баллов не должна превышать допустимый лимит.</p>
+
+          <h4>ВАРИАНТЫ ЭКЗАМЕНА</h4>
+          <p>Режим экзамена делится на 3 уровня помощи:</p>
+          <p><strong>LEVEL 1 — ПОЛНЫЕ ПОДСКАЗКИ</strong></p>
+          <ul>
+            <li>Зеленые указатели маршрута</li>
+            <li>Подсказки расположения штрафных зон</li>
+            <li>Подсказки как избежать штрафов</li>
+          </ul>
+          <p>Подходит для обучения.</p>
+
+          <p><strong>LEVEL 2 — ТОЛЬКО МАРШРУТ</strong></p>
+          <ul>
+            <li>Отображаются только зеленые указатели</li>
+            <li>Подсказок по штрафам нет</li>
+          </ul>
+          <p>Подходит для подготовки к экзамену.</p>
+
+          <p><strong>LEVEL 3 — РЕАЛЬНЫЙ ЭКЗАМЕН</strong></p>
+          <ul>
+            <li>Нет указателей маршрута</li>
+            <li>Нет подсказок системы</li>
+            <li>Только правила и навыки водителя</li>
+          </ul>
+          <p>Подходит для опытных пользователей.</p>
+
+          <h4>ЦЕЛЬ ТРЕНИРОВКИ</h4>
+          <p>Отработать выполнение экзаменационных упражнений и подготовиться к реальной сдаче на автодроме.</p>
+
+          <h4>ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ</h4>
+          <p>Симулятор доступен на всех популярных платформах:</p>
+          <div class="icon-list">
+            <div class="icon-item">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.2 7.2a6 6 0 0 1 9.6 0l1-1a7.5 7.5 0 0 0-11.6 0l1 1zm.6 2.1a4 4 0 0 1 6.4 0l1-1a5.5 5.5 0 0 0-8.4 0l1 1zM6 11.5c0 1.9 1.6 3.5 3.5 3.5h5c1.9 0 3.5-1.6 3.5-3.5S16.4 8 14.5 8h-5C7.6 8 6 9.6 6 11.5z"/></svg>
+              </span>
+              Android
+            </div>
+            <div class="icon-item">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 13.1c0-1.9 1-2.8 1-2.8s-1-1.1-2.4-1.2c-1.2-.1-2.3.7-2.8.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.6.8-3.3 2.1-1.4 2.4-.4 5.9 1 7.8.7.9 1.5 2 2.6 2 1 0 1.4-.6 2.7-.6s1.6.6 2.7.6c1.1 0 1.8-1 2.5-1.9.7-1.1 1-2.1 1-2.1s-2-1-2-3.9zm-2-6.2c.5-.6.9-1.5.8-2.4-.8.1-1.8.6-2.3 1.2-.5.6-.9 1.5-.8 2.4.9.1 1.8-.5 2.3-1.2z"/></svg>
+              </span>
+              iOS
+            </div>
+            <div class="icon-item">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h8v6H3V5zm10 0h8v6h-8V5zM3 13h8v6H3v-6zm10 0h8v6h-8v-6z"/></svg>
+              </span>
+              Windows
+            </div>
+            <div class="icon-item">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 6.4c.9-1.1 2.4-1.9 3.9-1.8.2 1.5-.5 3-1.4 3.9-.9 1.1-2.3 1.9-3.8 1.8-.2-1.5.4-3 .3-3.9zM7.5 9.7c1.4 0 2 .8 2.6.8.6 0 1.5-.8 2.8-.8 1.1 0 2.3.6 3 1.6-.3.2-1.8 1.1-1.8 3.1 0 2.3 2 3.1 2.1 3.1-.1.2-.3.9-.9 1.7-.5.7-1.1 1.3-2 1.3-.8 0-1.1-.5-2-.5-.9 0-1.3.5-2.1.5-.9 0-1.5-.7-2.1-1.4-1.2-1.7-2.1-4.9-.9-7 .6-1 1.7-1.6 2.9-1.6z"/></svg>
+              </span>
+              macOS
+            </div>
+          </div>
+          <p>Вы можете скачать приложение в магазинах:</p>
+          <div class="icon-list">
+            <div class="icon-item">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 13.1c0-1.9 1-2.8 1-2.8s-1-1.1-2.4-1.2c-1.2-.1-2.3.7-2.8.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.6.8-3.3 2.1-1.4 2.4-.4 5.9 1 7.8.7.9 1.5 2 2.6 2 1 0 1.4-.6 2.7-.6s1.6.6 2.7.6c1.1 0 1.8-1 2.5-1.9.7-1.1 1-2.1 1-2.1s-2-1-2-3.9zm-2-6.2c.5-.6.9-1.5.8-2.4-.8.1-1.8.6-2.3 1.2-.5.6-.9 1.5-.8 2.4.9.1 1.8-.5 2.3-1.2z"/></svg>
+              </span>
+              <a href="https://apps.apple.com/us/app/autodromkz/id6736940882" target="_blank" rel="noopener">App Store</a>
+            </div>
+            <div class="icon-item">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h18l-9 14L3 5zm6.5 2.5 2.2 3.4 2.4-3.4H9.5zm-2.6 0L12 16l5.1-8.5H6.9z"/></svg>
+              </span>
+              <a href="https://play.google.com/store/apps/details?id=com.MFMDEnterprise.autodromkz&hl=ru" target="_blank" rel="noopener">Google Play Market</a>
+            </div>
+            <div class="icon-item">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h8v6H3V5zm10 0h8v6h-8V5zM3 13h8v6H3v-6zm10 0h8v6h-8v-6z"/></svg>
+              </span>
+              <a href="https://apps.microsoft.com/" target="_blank" rel="noopener">Microsoft Store</a>
+            </div>
+          </div>
+          <p>Используйте удобную для вас платформу и тренируйтесь в любое время.</p>
+
+          <p class="credit">Разработано «AutodromKZ».</p>
+        </div>
+        <div class="shot js-open-slider" aria-label="Скриншоты продукта" role="button" tabindex="0">
+          <div class="shot-frame">
+            <div class="shot-slide is-active">
+              <img src="assets/images/simulatorScr/1%20ios.png" alt="AutodromKZ Screenshot 1">
+            </div>
+            <div class="shot-slide">
+              <img src="assets/images/simulatorScr/2%20ios.png" alt="AutodromKZ Screenshot 2">
+            </div>
+            <div class="shot-slide">
+              <img src="assets/images/simulatorScr/3%20ios.png" alt="AutodromKZ Screenshot 3">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="product" id="product-pdd" tabindex="-1">
+      <h3 style="margin-bottom: 25px;">ПДД ДОРОЖНЫЕ ЗНАКИ — USER GUIDE</h3>
+      
+      <div class="shot product-hero">
+        <div class="shot-frame">
+          <img src="assets/images/pddApp/main.png" alt="ПДД Дорожные знаки — главный экран">
+        </div>
+      </div>
+      <div class="product-grid is-single">
+        <div>
+          <h4>ОБЩАЯ ИНФОРМАЦИЯ</h4>
+          <p>Приложение «ПДД Дорожные знаки» создано для полного изучения дорожных знаков.</p>
+          <p>Цель — помочь быстро выучить значения знаков, закрепить знания через практику и уверенно подготовиться к экзамену.</p>
+          <p>Обучение построено по принципу: изучил → проверил → закрепил → отследил прогресс.</p>
+
+          <h4>ВОЗМОЖНОСТИ ПРИЛОЖЕНИЯ</h4>
+          <p><strong>01 — ИЗУЧЕНИЕ ЗНАКОВ</strong></p>
+          <p>Полный каталог дорожных знаков с подробным описанием.</p>
+          <ul>
+            <li>Просмотр знака и его значения</li>
+            <li>Пояснение и особенности применения</li>
+            <li>Возврат к сложным темам в один клик</li>
+          </ul>
+          <p>Подходит для базового обучения с нуля.</p>
+
+          <p><strong>02 — ВИКТОРИНА (ПРОВЕРКА ЗНАНИЙ)</strong></p>
+          <p>Интерактивные тесты в формате викторины.</p>
+          <ul>
+            <li>Быстрые тесты и проверка знаний</li>
+            <li>Мгновенная обратная связь</li>
+            <li>Разбор правильных и неправильных ответов</li>
+          </ul>
+          <p>Формат легкий и динамичный — запоминание происходит естественно.</p>
+
+          <p><strong>03 — ПРОГРЕСС И СТАТИСТИКА</strong></p>
+          <ul>
+            <li>Прогресс-бар показывает общий уровень освоения</li>
+            <li>Сохраняется история прохождений</li>
+            <li>Отображается процент правильных ответов</li>
+            <li>Фиксируются ошибки</li>
+          </ul>
+          <p>Ваш прогресс автоматически сохраняется и отображается в профиле.</p>
+
+          <p><strong>04 — РАБОТА НАД ОШИБКАМИ</strong></p>
+          <p>Система выделяет знаки, в которых были допущены ошибки.</p>
+          <ul>
+            <li>Повтор сложных вопросов</li>
+            <li>Отдельная проработка проблемных тем</li>
+            <li>Закрепление материала до полного понимания</li>
+          </ul>
+          <p>Это помогает учиться эффективно, а не хаотично.</p>
+
+          <h4>ПРЕИМУЩЕСТВА</h4>
+          <ul>
+            <li>Понятный интерфейс и быстрый старт</li>
+            <li>Обучение без перегрузки информацией</li>
+            <li>Наглядный прогресс-бар</li>
+            <li>Сохранение результатов</li>
+            <li>Подходит для самостоятельной подготовки к экзамену</li>
+          </ul>
+
+          <h4>РЕКЛАМНЫЙ БЛОК</h4>
+          <p>Попробуйте пройти несколько викторин — вы не успеете моргнуть, как начнете узнавать знаки автоматически.</p>
+          <p>Несколько минут в день — и значения дорожных знаков запоминаются без зубрежки.</p>
+          <p>Учитесь быстро. Проверяйте себя. Закрепляйте результат.</p>
+
+          <h4>ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ</h4>
+          <p>Приложение доступно на популярных мобильных платформах:</p>
+          <div class="icon-list">
+            <div class="icon-item">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.2 7.2a6 6 0 0 1 9.6 0l1-1a7.5 7.5 0 0 0-11.6 0l1 1zm.6 2.1a4 4 0 0 1 6.4 0l1-1a5.5 5.5 0 0 0-8.4 0l1 1zM6 11.5c0 1.9 1.6 3.5 3.5 3.5h5c1.9 0 3.5-1.6 3.5-3.5S16.4 8 14.5 8h-5C7.6 8 6 9.6 6 11.5z"/></svg>
+              </span>
+              Android
+            </div>
+            <div class="icon-item">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 13.1c0-1.9 1-2.8 1-2.8s-1-1.1-2.4-1.2c-1.2-.1-2.3.7-2.8.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.6.8-3.3 2.1-1.4 2.4-.4 5.9 1 7.8.7.9 1.5 2 2.6 2 1 0 1.4-.6 2.7-.6s1.6.6 2.7.6c1.1 0 1.8-1 2.5-1.9.7-1.1 1-2.1 1-2.1s-2-1-2-3.9zm-2-6.2c.5-.6.9-1.5.8-2.4-.8.1-1.8.6-2.3 1.2-.5.6-.9 1.5-.8 2.4.9.1 1.8-.5 2.3-1.2z"/></svg>
+              </span>
+              iOS
+            </div>
+          </div>
+          <p>Скачайте приложение в магазинах:</p>
+          <div class="icon-list">
+            <div class="icon-item">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 13.1c0-1.9 1-2.8 1-2.8s-1-1.1-2.4-1.2c-1.2-.1-2.3.7-2.8.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.6.8-3.3 2.1-1.4 2.4-.4 5.9 1 7.8.7.9 1.5 2 2.6 2 1 0 1.4-.6 2.7-.6s1.6.6 2.7.6c1.1 0 1.8-1 2.5-1.9.7-1.1 1-2.1 1-2.1s-2-1-2-3.9zm-2-6.2c.5-.6.9-1.5.8-2.4-.8.1-1.8.6-2.3 1.2-.5.6-.9 1.5-.8 2.4.9.1 1.8-.5 2.3-1.2z"/></svg>
+              </span>
+              <a href="https://apps.apple.com/us/app/%D0%BF%D0%B4%D0%B4-%D0%B4%D0%BE%D1%80%D0%BE%D0%B6%D0%BD%D1%8B%D0%B5-%D0%B7%D0%BD%D0%B0%D0%BA%D0%B8/id6747382280" target="_blank" rel="noopener">App Store</a>
+            </div>
+            <div class="icon-item">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h18l-9 14L3 5zm6.5 2.5 2.2 3.4 2.4-3.4H9.5zm-2.6 0L12 16l5.1-8.5H6.9z"/></svg>
+              </span>
+              <a href="https://play.google.com/store/apps/details?id=com.MFMDEnterprise.apppddtest&hl=ru" target="_blank" rel="noopener">Google Play Market</a>
+            </div>
+          </div>
+          <p>Выбирайте удобную платформу и начинайте обучение в любое время.</p>
+
+          <p class="credit">Разработано «AutodromKZ».</p>
+        </div>
+      </div>
+    </section>
+    <footer class="footer">
+      <div class="footer-links">
+        <button class="footer-link js-open-legal" type="button" data-legal="disclaimer">⚠ Правовая информация и отказ от гарантий</button>
+        <button class="footer-link js-open-legal" type="button" data-legal="notice">Правовое уведомление и ограничение ответственности</button>
+      </div>
+    </footer>
+    <div class="modal-overlay" id="legal-disclaimer" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="legal-disclaimer-title">
+        <button class="modal-close" type="button" aria-label="Закрыть">×</button>
+        <h3 id="legal-disclaimer-title">⚠ Правовая информация и отказ от гарантий</h3>
+        <div class="legal-text">
+          <p>Материалы и продукты, размещённые на данном сайте, предназначены исключительно для дополнительного обучения, самоподготовки и восполнения пробелов в знаниях правил дорожного движения.</p>
+          <p>Платформа не заменяет обучение в лицензированных автошколах и не является официальным образовательным учреждением.</p>
+          <p>Мы настоятельно рекомендуем проходить обязательную подготовку в аккредитованных автошколах и сдавать экзамены в установленном законодательством порядке. Получение водительского удостоверения незаконным способом недопустимо.</p>
+          <p>Администрация сайта не гарантирует полноту, актуальность или отсутствие возможных изменений в нормативных актах, правилах дорожного движения и дорожных знаках. Пользователь несёт самостоятельную ответственность за проверку информации в официальных источниках.</p>
+          <p>Использование материалов сайта осуществляется на усмотрение пользователя.</p>
+          <p>Безопасное и ответственное вождение — личная обязанность каждого участника дорожного движения.</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-overlay" id="legal-notice" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="legal-notice-title">
+        <button class="modal-close" type="button" aria-label="Закрыть">×</button>
+        <h3 id="legal-notice-title">ПРАВОВОЕ УВЕДОМЛЕНИЕ, УСЛОВИЯ ИСПОЛЬЗОВАНИЯ И ОГРАНИЧЕНИЕ ОТВЕТСТВЕННОСТИ</h3>
+        <div class="legal-text">
+          <ol>
+            <li><strong>Общие положения.</strong> Настоящий сайт, а также размещённые на нём материалы, сервисы и программные продукты предназначены исключительно для информационных и обучающих целей. Платформа используется как дополнительный инструмент самоподготовки.</li>
+            <li><strong>Отсутствие статуса образовательной организации.</strong> Сайт не является лицензированной автошколой, образовательным учреждением либо официальным органом по подготовке и аттестации водителей. Использование платформы не заменяет обязательное обучение в аккредитованных автошколах и не освобождает пользователя от прохождения установленной законодательством процедуры получения водительского удостоверения.</li>
+            <li><strong>Отсутствие гарантий.</strong> Администрация сайта не гарантирует: полноту, точность и актуальность размещённых материалов; соответствие информации действующей редакции нормативных правовых актов; отсутствие технических, методических или фактических ошибок; успешную сдачу экзаменов или достижение пользователем конкретных результатов обучения. Все материалы предоставляются по принципу «как есть» (as is).</li>
+            <li><strong>Ответственность пользователя.</strong> Пользователь самостоятельно принимает решение об использовании материалов сайта и несёт личную ответственность за: проверку актуальности правил дорожного движения в официальных источниках; соблюдение действующего законодательства; свои действия при управлении транспортным средством.</li>
+            <li><strong>Законность получения водительского удостоверения.</strong> Администрация сайта категорически не поддерживает и не поощряет незаконные способы получения водительского удостоверения. Пользователь обязуется действовать исключительно в рамках законодательства.</li>
+            <li><strong>Ограничение ответственности.</strong> Администрация сайта не несёт ответственности за любые прямые или косвенные убытки, ущерб, последствия либо иные риски, возникшие в результате использования или невозможности использования материалов платформы.</li>
+            <li><strong>Принятие условий.</strong> Используя сайт, регистрируясь на платформе или начиная использование программных продуктов, пользователь подтверждает, что: ознакомился с настоящими условиями; понимает их содержание; принимает их в полном объёме; соглашается соблюдать действующее законодательство. Если пользователь не согласен с указанными условиями, он обязан прекратить использование сайта.</li>
+            <li><strong>Безопасность дорожного движения.</strong> Безопасное и ответственное управление транспортным средством является личной обязанностью каждого участника дорожного движения.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="slider-modal" id="slider-modal" aria-hidden="true">
+      <div class="slider-box">
+        <button class="slider-close" type="button" aria-label="Закрыть">×</button>
+        <div class="slider-view">
+          <img id="slider-image" src="assets/images/simulatorScr/1%20ios.png" alt="AutodromKZ Screenshot">
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const slides = document.querySelectorAll(".shot-slide");
+    if (slides.length > 1) {
+      let slideIndex = 0;
+      setInterval(() => {
+        slides[slideIndex].classList.remove("is-active");
+        slideIndex = (slideIndex + 1) % slides.length;
+        slides[slideIndex].classList.add("is-active");
+      }, 4000);
+    }
+
+    const sliderModal = document.querySelector("#slider-modal");
+    const sliderImage = document.querySelector("#slider-image");
+    const sliderClose = sliderModal.querySelector(".slider-close");
+    const sliderOpen = document.querySelector(".js-open-slider");
+    const sliderSources = Array.from(document.querySelectorAll(".shot-slide img")).map((img) => img.src);
+    let sliderIndex = 0;
+
+    const openSlider = () => {
+      sliderModal.classList.add("is-open");
+      sliderModal.setAttribute("aria-hidden", "false");
+      sliderImage.src = sliderSources[sliderIndex] || sliderImage.src;
+      document.body.classList.add("modal-open");
+    };
+
+    const closeSlider = () => {
+      sliderModal.classList.remove("is-open");
+      sliderModal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+    };
+
+    if (sliderOpen) {
+      sliderOpen.addEventListener("click", openSlider);
+      sliderOpen.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openSlider();
+        }
+      });
+    }
+    sliderClose.addEventListener("click", closeSlider);
+    sliderModal.addEventListener("click", (event) => {
+      if (event.target === sliderModal) closeSlider();
+    });
+    const openBtns = document.querySelectorAll(".js-open-modal");
+    const modal = document.querySelector("#app-modal");
+    const closeBtn = modal.querySelector(".modal-close");
+    const cards = modal.querySelectorAll(".app-card");
+    const suggestOpenBtn = document.querySelector(".js-open-suggest");
+    const suggestModal = document.querySelector("#suggest-modal");
+    const suggestCloseBtn = suggestModal.querySelector(".modal-close");
+    const suggestForm = suggestModal.querySelector(".suggest-form");
+    const legalOpenBtns = document.querySelectorAll(".js-open-legal");
+    const legalDisclaimer = document.querySelector("#legal-disclaimer");
+    const legalNotice = document.querySelector("#legal-notice");
+    const legalModals = {
+      disclaimer: legalDisclaimer,
+      notice: legalNotice,
+    };
+    const ua = navigator.userAgent;
+    const isAndroid = /Android/i.test(ua);
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    const isMobile = isAndroid || isIOS;
+    const scrollNotes = document.querySelectorAll(".js-scroll-product");
+    const productTargets = {
+      simulator: document.querySelector("#product-simulator"),
+      pdd: document.querySelector("#product-pdd"),
+    };
+    const navToggle = document.querySelector(".js-nav-toggle");
+    const navOverlay = document.querySelector("#nav-overlay");
+    const nav = document.querySelector(".nav");
+
+    if (isMobile) {
+      document.body.classList.add("is-mobile");
+    }
+    const openNav = () => {
+      nav.classList.add("is-open");
+      navOverlay.classList.add("is-open");
+      navOverlay.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    };
+    const closeNav = () => {
+      nav.classList.remove("is-open");
+      navOverlay.classList.remove("is-open");
+      navOverlay.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+    };
+    const toggleNav = () => {
+      if (nav.classList.contains("is-open")) {
+        closeNav();
+      } else {
+        openNav();
+      }
+    };
+    if (navToggle) {
+      navToggle.addEventListener("click", toggleNav);
+    }
+    if (navOverlay) {
+      navOverlay.addEventListener("click", closeNav);
+    }
+    if (nav) {
+      nav.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", () => {
+          if (window.innerWidth <= 900) closeNav();
+        });
+      });
+    }
+
+    const openModal = () => {
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    };
+
+    const closeModal = () => {
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+    };
+
+    const openSuggestModal = () => {
+      suggestModal.classList.add("is-open");
+      suggestModal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    };
+
+    const closeSuggestModal = () => {
+      suggestModal.classList.remove("is-open");
+      suggestModal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+    };
+    const openLegalModal = (modalEl) => {
+      if (!modalEl) return;
+      modalEl.classList.add("is-open");
+      modalEl.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    };
+    const closeLegalModal = (modalEl) => {
+      if (!modalEl) return;
+      modalEl.classList.remove("is-open");
+      modalEl.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+    };
+
+    openBtns.forEach((btn) => {
+      btn.addEventListener("click", (event) => {
+        event.preventDefault();
+        openModal();
+      });
+      btn.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openModal();
+        }
+      });
+    });
+    scrollNotes.forEach((note) => {
+      const focusTarget = () => {
+        const target = productTargets[note.dataset.app];
+        if (!target) return;
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        target.focus({ preventScroll: true });
+      };
+      note.addEventListener("click", (event) => {
+        event.preventDefault();
+        focusTarget();
+      });
+      note.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          focusTarget();
+        }
+      });
+    });
+
+    closeBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    suggestOpenBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      openSuggestModal();
+    });
+    suggestCloseBtn.addEventListener("click", closeSuggestModal);
+    suggestModal.addEventListener("click", (event) => {
+      if (event.target === suggestModal) {
+        closeSuggestModal();
+      }
+    });
+    legalOpenBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const modalEl = legalModals[btn.dataset.legal];
+        openLegalModal(modalEl);
+      });
+    });
+    [legalDisclaimer, legalNotice].forEach((modalEl) => {
+      if (!modalEl) return;
+      const close = modalEl.querySelector(".modal-close");
+      close.addEventListener("click", () => closeLegalModal(modalEl));
+      modalEl.addEventListener("click", (event) => {
+        if (event.target === modalEl) {
+          closeLegalModal(modalEl);
+        }
+      });
+    });
+    suggestForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const type = suggestForm.querySelector("#suggest-type").value;
+      const app = suggestForm.querySelector("#suggest-app").value;
+      const text = suggestForm.querySelector("#suggest-text").value.trim();
+      if (!text) {
+        suggestForm.querySelector("#suggest-text").focus();
+        return;
+      }
+      const subject = "Предложение по приложению AutodromKZ";
+      const body = `Тема: ${type}\nПриложение: ${app}\n\n${text}`;
+      const mailto = `mailto:autodromkz@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = mailto;
+      closeSuggestModal();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && modal.classList.contains("is-open")) {
+        closeModal();
+      }
+      if (event.key === "Escape" && suggestModal.classList.contains("is-open")) {
+        closeSuggestModal();
+      }
+      if (event.key === "Escape" && nav.classList.contains("is-open")) {
+        closeNav();
+      }
+      if (event.key === "Escape" && legalDisclaimer && legalDisclaimer.classList.contains("is-open")) {
+        closeLegalModal(legalDisclaimer);
+      }
+      if (event.key === "Escape" && legalNotice && legalNotice.classList.contains("is-open")) {
+        closeLegalModal(legalNotice);
+      }
+    });
+
+    const handleCardActivate = (card) => {
+      const iosUrl = card.dataset.ios;
+      const androidUrl = card.dataset.android;
+
+      if (isAndroid) {
+        window.location.href = androidUrl;
+      } else if (isIOS) {
+        window.location.href = iosUrl;
+      }
+    };
+
+    cards.forEach((card) => {
+      const detailsBtn = card.querySelector(".details-btn");
+      const details = card.querySelector(".app-details");
+
+      card.addEventListener("click", (event) => {
+        if (event.target.closest(".store-links a") || event.target.closest(".details-btn")) {
+          return;
+        }
+        handleCardActivate(card);
+      });
+
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handleCardActivate(card);
+        }
+      });
+
+      detailsBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const isOpen = details.classList.toggle("is-open");
+        detailsBtn.setAttribute("aria-expanded", String(isOpen));
+      });
+    });
+  </script>
 </body>
 </html>
