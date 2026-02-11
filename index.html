@@ -692,6 +692,25 @@
       text-align:center;
       color:#dfe9e4;
     }
+    .footer-social{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .footer-social a{
+      color:#dfe9e4;
+      font-size:13px;
+      text-decoration:none;
+      border-bottom:1px dashed rgba(223,233,228,0.5);
+      padding-bottom:2px;
+    }
+    .footer-social a:hover{
+      color:#ffffff;
+      border-bottom-color:rgba(255,255,255,0.8);
+    }
     .footer-links{
       display:flex;
       gap:16px;
@@ -1092,7 +1111,7 @@
     <section class="product" id="product-pdd" tabindex="-1">
       <h3 style="margin-bottom: 25px;">ПДД ДОРОЖНЫЕ ЗНАКИ — USER GUIDE</h3>
       
-      <div class="shot product-hero">
+      <div class="shot product-hero js-open-slider" data-src="assets/images/pddApp/main.png" aria-label="Скриншот продукта" role="button" tabindex="0">
         <div class="shot-frame">
           <img src="assets/images/pddApp/main.png" alt="ПДД Дорожные знаки — главный экран">
         </div>
@@ -1193,6 +1212,12 @@
       </div>
     </section>
     <footer class="footer">
+      <div class="footer-social">
+        <a href="https://www.instagram.com/autodromkz?igsh=aWI2MHo0aTJhemM0&utm_source=qr" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://t.me/autodromkz01" target="_blank" rel="noopener">Telegram</a>
+        <a href="https://www.youtube.com/@autodromkz" target="_blank" rel="noopener">YouTube</a>
+        <a href="https://www.tiktok.com/@autodromkz_?_t=8rZq0jXty2K&_r=1&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGneh1dk4g5QGo752s2w4yIJtXd2RWUHRJOg7O6oIXcVnU-Lx5oAxTUVuUt9Ek_aem_oXNrEYXctILLAukqrVqWJw" target="_blank" rel="noopener">TikTok</a>
+      </div>
       <div class="footer-links">
         <button class="footer-link js-open-legal" type="button" data-legal="disclaimer">⚠ Правовая информация и отказ от гарантий</button>
         <button class="footer-link js-open-legal" type="button" data-legal="notice">Правовое уведомление и ограничение ответственности</button>
@@ -1247,20 +1272,26 @@
         slides[slideIndex].classList.remove("is-active");
         slideIndex = (slideIndex + 1) % slides.length;
         slides[slideIndex].classList.add("is-active");
-      }, 4000);
+      }, 2500);
     }
 
     const sliderModal = document.querySelector("#slider-modal");
     const sliderImage = document.querySelector("#slider-image");
     const sliderClose = sliderModal.querySelector(".slider-close");
-    const sliderOpen = document.querySelector(".js-open-slider");
+    const sliderOpen = document.querySelectorAll(".js-open-slider");
     const sliderSources = Array.from(document.querySelectorAll(".shot-slide img")).map((img) => img.src);
     let sliderIndex = 0;
+    let activeSliderSources = sliderSources;
 
-    const openSlider = () => {
+    const openSlider = (src) => {
+      activeSliderSources = sliderSources;
+      if (src) {
+        activeSliderSources = [src];
+        sliderIndex = 0;
+      }
       sliderModal.classList.add("is-open");
       sliderModal.setAttribute("aria-hidden", "false");
-      sliderImage.src = sliderSources[sliderIndex] || sliderImage.src;
+      sliderImage.src = activeSliderSources[sliderIndex] || sliderImage.src;
       document.body.classList.add("modal-open");
     };
 
@@ -1270,19 +1301,28 @@
       document.body.classList.remove("modal-open");
     };
 
-    if (sliderOpen) {
-      sliderOpen.addEventListener("click", openSlider);
-      sliderOpen.addEventListener("keydown", (event) => {
+    const nextSliderImage = () => {
+      if (!activeSliderSources.length) return;
+      sliderIndex = (sliderIndex + 1) % activeSliderSources.length;
+      sliderImage.src = activeSliderSources[sliderIndex];
+    };
+
+    sliderOpen.forEach((opener) => {
+      opener.addEventListener("click", () => {
+        openSlider(opener.dataset.src);
+      });
+      opener.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          openSlider();
+          openSlider(opener.dataset.src);
         }
       });
-    }
+    });
     sliderClose.addEventListener("click", closeSlider);
     sliderModal.addEventListener("click", (event) => {
       if (event.target === sliderModal) closeSlider();
     });
+    sliderImage.addEventListener("click", nextSliderImage);
     const openBtns = document.querySelectorAll(".js-open-modal");
     const modal = document.querySelector("#app-modal");
     const closeBtn = modal.querySelector(".modal-close");
